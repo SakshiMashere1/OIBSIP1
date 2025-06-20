@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Railway Reservation System</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Navigation Styles */
+        nav {
+            background-color: #34495e;
+            padding: 10px 0;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            background-color: #2c3e50;
+        }
+        
+        /* Form Styles */
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 600px;
+        }
+        
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .secondary-btn {
+            background-color: #95a5a6;
+            margin-top: 10px;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #7f8c8d;
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+            background-color: #34495e;
+            color: white;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .success {
+            color: #2ecc71;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 5px 0;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Online Railway Reservation System</h1>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#" id="nav-home">Home</a></li>
+                <li><a href="#" id="nav-login" class="active">Login</a></li>
+                <li><a href="#" id="nav-reservation">Reservation</a></li>
+                <li><a href="#" id="nav-cancellation">Cancellation</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Home Section -->
+        <section id="home-section">
+            <div class="form-container">
+                <h2>Welcome to Railway Reservation System</h2>
+                <p>Book your train tickets online with ease. Our system provides:</p>
+                <ul style="margin: 20px 0 20px 30px;">
+                    <li>Easy ticket booking</li>
+                    <li>Quick cancellation</li>
+                    <li>Secure payment</li>
+                    <li>24/7 availability</li>
+                </ul>
+                <p>Please login to access all features.</p>
+                <button id="go-to-login" class="btn btn-block">Login Now</button>
+            </div>
+        </section>
+        
+        <!-- Login Section -->
+        <section id="login-section" class="hidden">
+            <div class="form-container">
+                <h2>User Login</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" required>
+                        <div id="login-username-error" class="error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                        <div id="login-password-error" class="error hidden"></div>
+                    </div>
+                    <button type="submit" class="btn btn-block">Login</button>
+                    <button type="button" id="register-btn" class="btn secondary-btn btn-block">Register New User</button>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Register Section -->
+        <section id="register-section" class="hidden">
+            <div class="form-container">
+                <h2>Register New User</h2>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" required>
+                        <div id="register-username-error" class="error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                        <div id="register-password-error" class="error hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-phone">Phone Number</label>
+                        <input type="tel" id="register-phone" required>
+                    </div>
+                    <button type="submit" class="btn btn-block">Register</button>
+                    <button type="button" id="back-to-login" class="btn secondary-btn btn-block">Back to Login</button>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Reservation Section -->
+        <section id="reservation-section" class="hidden">
+            <div class="form-container">
+                <h2>Train Ticket Reservation</h2>
+                <form id="reservation-form">
+                    <div class="form-group">
+                        <label for="passenger-name">Passenger Name</label>
+                        <input type="text" id="passenger-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger-age">Age</label>
+                        <input type="number" id="passenger-age" min="1" max="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger-gender">Gender</label>
+                        <select id="passenger-gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="train-number">Train Number</label>
+                        <input type="text" id="train-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="train-name">Train Name</label>
+                        <input type="text" id="train-name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="from-station">From Station</label>
+                        <input type="text" id="from-station" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="to-station">To Station</label>
+                        <input type="text" id="to-station" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="journey-date">Journey Date</label>
+                        <input type="date" id="journey-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-type">Class</label>
+                        <select id="class-type" required>
+                            <option value="">Select Class</option>
+                            <option value="First Class">First Class</option>
+                            <option value="Second Class">Second Class</option>
+                            <option value="Sleeper">Sleeper</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-block">Book Ticket</button>
+                    <div id="reservation-success" class="success hidden"></div>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Cancellation Section -->
+        <section id="cancellation-section" class="hidden">
+            <div class="form-container">
+                <h2>Ticket Cancellation</h2>
+                <form id="cancellation-form">
+                    <div class="form-group">
+                        <label for="pnr-number">PNR Number</label>
+                        <input type="text" id="pnr-number" required>
+                        <div id="pnr-error" class="error hidden"></div>
+                    </div>
+                    <button type="submit" class="btn btn-block">Search Booking</button>
+                </form>
+                
+                <div id="booking-details" class="hidden">
+                    <h3 style="margin-top: 30px;">Booking Details</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booking-details-body">
+                            <!-- Booking details will be inserted here -->
+                        </tbody>
+                    </table>
+                    <button id="confirm-cancel" class="btn btn-block" style="margin-top: 20px;">Confirm Cancellation</button>
+                    <div id="cancellation-success" class="success hidden"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Database Simulation (using localStorage)
+        let users = JSON.parse(localStorage.getItem('railwayUsers')) || [];
+        let trains = JSON.parse(localStorage.getItem('railwayTrains')) || [
+            { number: '12301', name: 'Rajdhani Express', source: 'Delhi', destination: 'Mumbai' },
+            { number: '12302', name: 'Shatabdi Express', source: 'Chennai', destination: 'Bangalore' },
+            { number: '12303', name: 'Duronto Express', source: 'Howrah', destination: 'New Delhi' },
+            { number: '12304', name: 'Garib Rath', source: 'Mumbai', destination: 'Goa' }
+        ];
+        let bookings = JSON.parse(localStorage.getItem('railwayBookings')) || [];
+        let currentUser = null;
+
+        // Initialize database if empty
+        if (users.length === 0) {
+            // Add admin user
+            users.push({
+                username: 'admin',
+                password: 'admin123',
+                name: 'Admin User',
+                email: 'admin@railway.com',
+                phone: '9876543210'
+            });
+            localStorage.setItem('railwayUsers', JSON.stringify(users));
+        }
+        
+        if (trains.length > 0 && !localStorage.getItem('railwayTrains')) {
+            localStorage.setItem('railwayTrains', JSON.stringify(trains));
+        }
+
+        // DOM Elements
+        const sections = {
+            home: document.getElementById('home-section'),
+            login: document.getElementById('login-section'),
+            register: document.getElementById('register-section'),
+            reservation: document.getElementById('reservation-section'),
+            cancellation: document.getElementById('cancellation-section')
+        };
+        
+        const navLinks = {
+            home: document.getElementById('nav-home'),
+            login: document.getElementById('nav-login'),
+            reservation: document.getElementById('nav-reservation'),
+            cancellation: document.getElementById('nav-cancellation')
+        };
+        
+        // Form elements
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const reservationForm = document.getElementById('reservation-form');
+        const cancellationForm = document.getElementById('cancellation-form');
+        
+        // Buttons
+        const goToLoginBtn = document.getElementById('go-to-login');
+        const registerBtn = document.getElementById('register-btn');
+        const backToLoginBtn = document.getElementById('back-to-login');
+        const confirmCancelBtn = document.getElementById('confirm-cancel');
+        
+        // Initialize the app
+        function init() {
+            // Set up event listeners
+            goToLoginBtn.addEventListener('click', () => showSection('login'));
+            
+            registerBtn.addEventListener('click', () => showSection('register'));
+            backToLoginBtn.addEventListener('click', () => showSection('login'));
+            
+            navLinks.home.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('home');
+            });
+            
+            navLinks.login.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection('login');
+            });
+            
+            navLinks.reservation.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    showSection('reservation');
+                } else {
+                    alert('Please login first');
+                    showSection('login');
+                }
+            });
+            
+            navLinks.cancellation.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    showSection('cancellation');
+                } else {
+                    alert('Please login first');
+                    showSection('login');
+                }
+            });
+            
+            // Form submissions
+            loginForm.addEventListener('submit', handleLogin);
+            registerForm.addEventListener('submit', handleRegister);
+            reservationForm.addEventListener('submit', handleReservation);
+            cancellationForm.addEventListener('submit', handleCancellationSearch);
+            confirmCancelBtn.addEventListener('click', handleCancellation);
+            
+            // Train number autocomplete
+            document.getElementById('train-number').addEventListener('change', updateTrainDetails);
+            
+            // Show home section by default
+            showSection('home');
+        }
+        
+        // Show a specific section and hide others
+        function showSection(sectionName) {
+            // Hide all sections
+            Object.values(sections).forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the requested section
+            sections[sectionName].classList.remove('hidden');
+            
+            // Update active nav link
+            Object.values(navLinks).forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            if (navLinks[sectionName]) {
+                navLinks[sectionName].classList.add('active');
+            }
+            
+            // Reset forms when showing them
+            if (sectionName === 'login') {
+                loginForm.reset();
+            } else if (sectionName === 'register') {
+                registerForm.reset();
+            } else if (sectionName === 'reservation') {
+                reservationForm.reset();
+                document.getElementById('reservation-success').classList.add('hidden');
+            } else if (sectionName === 'cancellation') {
+                cancellationForm.reset();
+                document.getElementById('booking-details').classList.add('hidden');
+                document.getElementById('cancellation-success').classList.add('hidden');
+            }
+        }
+        
+        // Handle login form submission
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            
+            // Reset errors
+            document.getElementById('login-username-error').classList.add('hidden');
+            document.getElementById('login-password-error').classList.add('hidden');
+            
+            // Validate
+            if (!username) {
+                document.getElementById('login-username-error').textContent = 'Username is required';
+                document.getElementById('login-username-error').classList.remove('hidden');
+                return;
+            }
+            
+            if (!password) {
+                document.getElementById('login-password-error').textContent = 'Password is required';
+                document.getElementById('login-password-error').classList.remove('hidden');
+                return;
+            }
+            
+            // Check credentials
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                showSection('reservation');
+            } else {
+                document.getElementById('login-password-error').textContent = 'Invalid username or password';
+                document.getElementById('login-password-error').classList.remove('hidden');
+            }
+        }
+        
+        // Handle register form submission
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            
+            // Reset errors
+            document.getElementById('register-username-error').classList.add('hidden');
+            document.getElementById('register-password-error').classList.add('hidden');
+            
+            // Validate
+            let isValid = true;
+            
+            if (!username) {
+                document.getElementById('register-username-error').textContent = 'Username is required';
+                document.getElementById('register-username-error').classList.remove('hidden');
+                isValid = false;
+            } else if (username.length < 4) {
+                document.getElementById('register-username-error').textContent = 'Username must be at least 4 characters';
+                document.getElementById('register-username-error').classList.remove('hidden');
+                isValid = false;
+            } else if (users.some(u => u.username === username)) {
+                document.getElementById('register-username-error').textContent = 'Username already exists';
+                document.getElementById('register-username-error').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            if (!password) {
+                document.getElementById('register-password-error').textContent = 'Password is required';
+                document.getElementById('register-password-error').classList.remove('hidden');
+                isValid = false;
+            } else if (password.length < 6) {
+                document.getElementById('register-password-error').textContent = 'Password must be at least 6 characters';
+                document.getElementById('register-password-error').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // Create new user
+            const newUser = {
+                username,
+                password,
+                name,
+                email,
+                phone
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('railwayUsers', JSON.stringify(users));
+            
+            // Auto-login
+            currentUser = newUser;
+            alert('Registration successful! You are now logged in.');
+            showSection('reservation');
+        }
+        
+        // Update train details when train number is entered
+        function updateTrainDetails() {
+            const trainNumber = document.getElementById('train-number').value.trim();
+            const train = trains.find(t => t.number === trainNumber);
+            
+            if (train) {
+                document.getElementById('train-name').value = train.name;
+                document.getElementById('from-station').value = train.source;
+                document.getElementById('to-station').value = train.destination;
+            } else {
+                document.getElementById('train-name').value = '';
+                document.getElementById('from-station').value = '';
+                document.getElementById('to-station').value = '';
+            }
+        }
+        
+        // Handle reservation form submission
+        function handleReservation(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const passengerName = document.getElementById('passenger-name').value.trim();
+            const passengerAge = document.getElementById('passenger-age').value.trim();
+            const passengerGender = document.getElementById('passenger-gender').value;
+            const trainNumber = document.getElementById('train-number').value.trim();
+            const trainName = document.getElementById('train-name').value.trim();
+            const fromStation = document.getElementById('from-station').value.trim();
+            const toStation = document.getElementById('to-station').value.trim();
+            const journeyDate = document.getElementById('journey-date').value;
+            const classType = document.getElementById('class-type').value;
+            
+            // Validate
+            if (!passengerName || !passengerAge || !passengerGender || !trainNumber || 
+                !trainName || !fromStation || !toStation || !journeyDate || !classType) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Generate PNR (simple random number for demo)
+            const pnr = 'PNR' + Math.floor(100000 + Math.random() * 900000);
+            
+            // Create booking
+            const newBooking = {
+                pnr,
+                username: currentUser.username,
+                passengerName,
+                passengerAge,
+                passengerGender,
+                trainNumber,
+                trainName,
+                fromStation,
+                toStation,
+                journeyDate,
+                classType,
+                bookingDate: new Date().toISOString().split('T')[0],
+                status: 'Confirmed'
+            };
+            
+            bookings.push(newBooking);
+            localStorage.setItem('railwayBookings', JSON.stringify(bookings));
+            
+            // Show success message
+            const successMsg = document.getElementById('reservation-success');
+            successMsg.textContent = `Ticket booked successfully! Your PNR number is: ${pnr}`;
+            successMsg.classList.remove('hidden');
+            
+            // Reset form
+            reservationForm.reset();
+        }
+        
+        // Handle cancellation search
+        function handleCancellationSearch(e) {
+            e.preventDefault();
+            
+            const pnr = document.getElementById('pnr-number').value.trim();
+            
+            if (!pnr) {
+                document.getElementById('pnr-error').textContent = 'PNR number is required';
+                document.getElementById('pnr-error').classList.remove('hidden');
+                return;
+            }
+            
+            // Find booking
+            const booking = bookings.find(b => b.pnr === pnr && b.username === currentUser.username);
+            
+            if (!booking) {
+                document.getElementById('pnr-error').textContent = 'No booking found with this PNR number';
+                document.getElementById('pnr-error').classList.remove('hidden');
+                document.getElementById('booking-details').classList.add('hidden');
+                return;
+            }
+            
+            // Display booking details
+            const detailsBody = document.getElementById('booking-details-body');
+            detailsBody.innerHTML = '';
+            
+            const fields = [
+                { label: 'PNR Number', value: booking.pnr },
+                { label: 'Passenger Name', value: booking.passengerName },
+                { label: 'Train Number', value: booking.trainNumber },
+                { label: 'Train Name', value: booking.trainName },
+                { label: 'From', value: booking.fromStation },
+                { label: 'To', value: booking.toStation },
+                { label: 'Journey Date', value: booking.journeyDate },
+                { label: 'Class', value: booking.classType },
+                { label: 'Status', value: booking.status }
+            ];
+            
+            fields.forEach(field => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${field.label}</td>
+                    <td>${field.value}</td>
+                `;
+                detailsBody.appendChild(row);
+            });
+            
+            // Store current PNR for cancellation
+            confirmCancelBtn.dataset.pnr = pnr;
+            
+            // Show booking details
+            document.getElementById('pnr-error').classList.add('hidden');
+            document.getElementById('booking-details').classList.remove('hidden');
+        }
+        
+        // Handle cancellation
+        function handleCancellation() {
+            const pnr = this.dataset.pnr;
+            
+            if (!pnr) return;
+            
+            // Find booking index
+            const bookingIndex = bookings.findIndex(b => b.pnr === pnr);
+            
+            if (bookingIndex === -1) return;
+            
+            // Update booking status
+            bookings[bookingIndex].status = 'Cancelled';
+            localStorage.setItem('railwayBookings', JSON.stringify(bookings));
+            
+            // Show success message
+            const successMsg = document.getElementById('cancellation-success');
+            successMsg.textContent = 'Ticket cancelled successfully!';
+            successMsg.classList.remove('hidden');
+            
+            // Hide booking details
+            document.getElementById('booking-details').classList.add('hidden');
+            
+            // Reset form
+            cancellationForm.reset();
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

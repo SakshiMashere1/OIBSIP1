@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .atm-container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+            text-align: center;
+        }
+        .screen {
+            background-color: #e6f2ff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 150px;
+            border-radius: 5px;
+        }
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0055aa;
+        }
+        .function-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .function-buttons button {
+            background-color: #4CAF50;
+        }
+        .function-buttons button:hover {
+            background-color: #45a049;
+        }
+        .quit-button {
+            background-color: #f44336;
+        }
+        .quit-button:hover {
+            background-color: #d32f2f;
+        }
+        input {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .transaction {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="atm-container">
+        <h1>ATM Simulation</h1>
+        <div class="screen" id="screen">
+            <div id="output">Welcome to the ATM. Please enter your User ID and PIN.</div>
+            <div id="input-area" style="margin-top: 10px;">
+                <input type="text" id="userId" placeholder="User ID" style="display: block;">
+                <input type="password" id="userPin" placeholder="PIN" style="display: block;">
+                <button onclick="login()" style="margin-top: 10px;">Login</button>
+            </div>
+        </div>
+
+        <div class="keypad" id="keypad" style="display: none;">
+            <button onclick="appendInput('1')">1</button>
+            <button onclick="appendInput('2')">2</button>
+            <button onclick="appendInput('3')">3</button>
+            <button onclick="appendInput('4')">4</button>
+            <button onclick="appendInput('5')">5</button>
+            <button onclick="appendInput('6')">6</button>
+            <button onclick="appendInput('7')">7</button>
+            <button onclick="appendInput('8')">8</button>
+            <button onclick="appendInput('9')">9</button>
+            <button onclick="appendInput('0')">0</button>
+            <button onclick="clearInput()">Clear</button>
+            <button onclick="submitInput()">Enter</button>
+        </div>
+
+        <div class="function-buttons" id="function-buttons" style="display: none;">
+            <button onclick="showTransactions()">Transactions History</button>
+            <button onclick="prepareWithdraw()">Withdraw</button>
+            <button onclick="prepareDeposit()">Deposit</button>
+            <button onclick="prepareTransfer()">Transfer</button>
+            <button onclick="quit()" class="quit-button">Quit</button>
+        </div>
+    </div>
+
+    <script>
+        // ATM simulation classes
+        class User {
+            constructor(userId, userPin, balance) {
+                this.userId = userId;
+                this.userPin = userPin;
+                this.balance = balance;
+                this.transactions = [];
+            }
+            
+            addTransaction(type, amount, targetUserId = null) {
+                const transaction = {
+                    type,
+                    amount,
+                    date: new Date(),
+                    balance: this.balance,
+                    targetUserId
+                };
+                this.transactions.push(transaction);
+                return transaction;
+            }
+        }
+
+        class ATM {
+            constructor() {
+                this.users = [
+                    new User("12345", "1111", 1000),
+                    new User("67890", "2222", 2000)
+                ];
+                this.currentUser = null;
+                this.inputBuffer = "";
+                this.currentOperation = null;
+            }
+            
+            authenticate(userId, userPin) {
+                const user = this.users.find(u => u.userId === userId && u.userPin === userPin);
+                if (user) {
+                    this.currentUser = user;
+                    return true;
+                }
+                return false;
+            }
+            
+            logout() {
+                this.currentUser = null;
+                this.inputBuffer = "";
+                this.currentOperation = null;
+            }
+            
+            withdraw(amount) {
+                if (amount > this.currentUser.balance) {
+                    return { success: false, message: "Insufficient funds" };
+                }
+                
+                this.currentUser.balance -= amount;
+                this.currentUser.addTransaction("Withdrawal", amount);
+                return { success: true, message: `Withdrawal successful. New balance: $${this.currentUser.balance}` };
+            }
+            
+            deposit(amount) {
+                this.currentUser.balance += amount;
+                this.currentUser.addTransaction("Deposit", amount);
+                return { success: true, message: `Deposit successful. New balance: $${this.currentUser.balance}` };
+            }
+            
+            transfer(amount, targetUserId) {
+                const targetUser = this.users.find(u => u.userId === targetUserId);
+                
+                if (!targetUser) {
+                    return { success: false, message: "Recipient account not found" };
+                }
+                
+                if (amount > this.currentUser.balance) {
+                    return { success: false, message: "Insufficient funds" };
+                }
+                
+                this.currentUser.balance -= amount;
+                targetUser.balance += amount;
+                
+                this.currentUser.addTransaction("Transfer Out", amount, targetUserId);
+                targetUser.addTransaction("Transfer In", amount, this.currentUser.userId);
+                
+                return { 
+                    success: true, 
+                    message: `Transfer successful. $${amount} sent to ${targetUserId}. New balance: $${this.currentUser.balance}`
+                };
+            }
+            
+            getTransactionHistory() {
+                return this.currentUser.transactions;
+            }
+        }
+
+        // Create ATM instance
+        const atm = new ATM();
+
+        // DOM manipulation functions
+        function updateScreen(message) {
+            document.getElementById("output").innerHTML = message;
+        }
+
+        function showInputArea(show) {
+            document.getElementById("input-area").style.display = show ? "block" : "none";
+        }
+
+        function showKeypad(show) {
+            document.getElementById("keypad").style.display = show ? "grid" : "none";
+        }
+
+        function showFunctionButtons(show) {
+            document.getElementById("function-buttons").style.display = show ? "grid" : "none";
+        }
+
+        function clearInput() {
+            atm.inputBuffer = "";
+            updateScreen("Enter amount:");
+        }
+
+        function appendInput(value) {
+            atm.inputBuffer += value;
+            updateScreen("Enter amount: $" + atm.inputBuffer);
+        }
+
+        function submitInput() {
+            const amount = parseFloat(atm.inputBuffer);
+            
+            if (isNaN(amount) || amount <= 0) {
+                updateScreen("Invalid amount. Please try again.");
+                atm.inputBuffer = "";
+                return;
+            }
+            
+            let result;
+            
+            switch(atm.currentOperation) {
+                case "withdraw":
+                    result = atm.withdraw(amount);
+                    break;
+                case "deposit":
+                    result = atm.deposit(amount);
+                    break;
+                case "transfer":
+                    result = atm.transfer(amount, atm.transferTarget);
+                    break;
+                default:
+                    result = { success: false, message: "Invalid operation" };
+            }
+            
+            updateScreen(result.message);
+            atm.inputBuffer = "";
+            atm.currentOperation = null;
+            showKeypad(false);
+            
+            // Return to main menu after 3 seconds
+            setTimeout(showMainMenu, 3000);
+        }
+
+        function login() {
+            const userId = document.getElementById("userId").value;
+            const userPin = document.getElementById("userPin").value;
+            
+            if (atm.authenticate(userId, userPin)) {
+                updateScreen(`Welcome, user ${userId}!`);
+                showInputArea(false);
+                showKeypad(false);
+                showFunctionButtons(true);
+            } else {
+                updateScreen("Invalid User ID or PIN. Please try again.");
+            }
+            
+            // Clear input fields
+            document.getElementById("userId").value = "";
+            document.getElementById("userPin").value = "";
+        }
+
+        function showMainMenu() {
+            updateScreen(`Main Menu<br>Balance: $${atm.currentUser.balance}<br>Please select an option.`);
+            showKeypad(false);
+            showFunctionButtons(true);
+        }
+
+        function showTransactions() {
+            const transactions = atm.getTransactionHistory();
+            let message = "<h3>Transaction History</h3>";
+            
+            if (transactions.length === 0) {
+                message += "No transactions found.";
+            } else {
+                transactions.forEach((tran, index) => {
+                    message += `
+                        <div class="transaction">
+                            ${index + 1}. ${tran.type}: $${tran.amount}<br>
+                            Date: ${tran.date.toLocaleString()}<br>
+                            Balance after: $${tran.balance}<br>
+                            ${tran.targetUserId ? `Target: ${tran.targetUserId}` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            updateScreen(message);
+            
+            // Return to main menu after 5 seconds
+            setTimeout(showMainMenu, 5000);
+        }
+
+        function prepareWithdraw() {
+            atm.currentOperation = "withdraw";
+            updateScreen("Enter withdrawal amount:");
+            showKeypad(true);
+            showFunctionButtons(false);
+            atm.inputBuffer = "";
+        }
+
+        function prepareDeposit() {
+            atm.currentOperation = "deposit";
+            updateScreen("Enter deposit amount:");
+            showKeypad(true);
+            showFunctionButtons(false);
+            atm.inputBuffer = "";
+        }
+
+        function prepareTransfer() {
+            updateScreen("Enter recipient's User ID:");
+            showInputArea(true);
+            showKeypad(false);
+            showFunctionButtons(false);
+            
+            // Override the input area for transfer target
+            const inputArea = document.getElementById("input-area");
+            inputArea.innerHTML = `
+                <input type="text" id="transferTarget" placeholder="Recipient User ID">
+                <button onclick="setTransferTarget()" style="margin-top: 10px;">Continue</button>
+            `;
+        }
+
+        function setTransferTarget() {
+            const targetUserId = document.getElementById("transferTarget").value;
+            
+            // Validate target user exists (not the same as current user)
+            const targetUser = atm.users.find(u => u.userId === targetUserId && u.userId !== atm.currentUser.userId);
+            
+            if (!targetUser) {
+                updateScreen("Invalid recipient ID. Please try again.");
+                return;
+            }
+            
+            atm.transferTarget = targetUserId;
+            atm.currentOperation = "transfer";
+            updateScreen(`Transfer to ${targetUserId}. Enter amount:`);
+            showInputArea(false);
+            showKeypad(true);
+            atm.inputBuffer = "";
+        }
+
+        function quit() {
+            updateScreen("Thank you for using our ATM. Please take your card.");
+            atm.logout();
+            showKeypad(false);
+            showFunctionButtons(false);
+            
+            // Reset to login screen after 3 seconds
+            setTimeout(() => {
+                updateScreen("Welcome to the ATM. Please enter your User ID and PIN.");
+                showInputArea(true);
+                document.getElementById("input-area").innerHTML = `
+                    <input type="text" id="userId" placeholder="User ID" style="display: block;">
+                    <input type="password" id="userPin" placeholder="PIN" style="display: block;">
+                    <button onclick="login()" style="margin-top: 10px;">Login</button>
+                `;
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

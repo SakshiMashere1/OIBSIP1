@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Examination System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .login-form, .profile-form, .exam-container {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        .timer {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .option {
+            margin: 10px 0;
+        }
+        .result-container {
+            text-align: center;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Online Examination System</h1>
+        
+        <!-- Login Section -->
+        <div id="login-section" class="login-form active">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button onclick="login()">Login</button>
+            <p id="login-error" style="color: red;"></p>
+        </div>
+        
+        <!-- Profile Section -->
+        <div id="profile-section" class="profile-form">
+            <h2>Update Profile</h2>
+            <input type="text" id="fullname" placeholder="Full Name">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="new-password" placeholder="New Password">
+            <input type="password" id="confirm-password" placeholder="Confirm Password">
+            <div class="nav-buttons">
+                <button onclick="updateProfile()">Update Profile</button>
+                <button onclick="startExam()">Start Exam</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            <p id="profile-message" style="color: green;"></p>
+        </div>
+        
+        <!-- Exam Section -->
+        <div id="exam-section" class="exam-container">
+            <div class="timer" id="timer">Time Left: 30:00</div>
+            <div id="question-container"></div>
+            <div class="nav-buttons">
+                <button id="prev-btn" onclick="prevQuestion()">Previous</button>
+                <button id="next-btn" onclick="nextQuestion()">Next</button>
+                <button class="logout-btn" onclick="submitExam()">Submit Exam</button>
+            </div>
+        </div>
+        
+        <!-- Result Section -->
+        <div id="result-section" class="result-container">
+            <h2>Exam Results</h2>
+            <div class="score" id="score-display"></div>
+            <div id="result-details"></div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // User data and questions
+        const users = [
+            { username: "student1", password: "pass123", fullname: "John Doe", email: "john@example.com" },
+            { username: "student2", password: "pass123", fullname: "Jane Smith", email: "jane@example.com" }
+        ];
+
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                options: ["London", "Berlin", "Paris", "Madrid"],
+                answer: 2
+            },
+            {
+                question: "Which language runs in a web browser?",
+                options: ["Java", "C", "Python", "JavaScript"],
+                answer: 3
+            },
+            {
+                question: "What does HTML stand for?",
+                options: [
+                    "Hypertext Markup Language",
+                    "Hypertext Markdown Language",
+                    "Hyperloop Machine Language",
+                    "Helicopters Terminals Motorboats Lamborginis"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which year was JavaScript launched?",
+                options: ["1996", "1995", "1994", "None of the above"],
+                answer: 1
+            },
+            {
+                question: "What does CSS stand for?",
+                options: [
+                    "Central Style Sheets",
+                    "Cascading Style Sheets",
+                    "Cascading Simple Sheets",
+                    "Cars SUVs Sailboats"
+                ],
+                answer: 1
+            }
+        ];
+
+        // Global variables
+        let currentUser = null;
+        let userAnswers = Array(questions.length).fill(null);
+        let currentQuestionIndex = 0;
+        let examTimer;
+        let timeLeft = 30 * 60; // 30 minutes in seconds
+
+        // DOM elements
+        const loginSection = document.getElementById("login-section");
+        const profileSection = document.getElementById("profile-section");
+        const examSection = document.getElementById("exam-section");
+        const resultSection = document.getElementById("result-section");
+        const questionContainer = document.getElementById("question-container");
+        const timerElement = document.getElementById("timer");
+        const loginError = document.getElementById("login-error");
+        const profileMessage = document.getElementById("profile-message");
+
+        // Login function
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                loginError.textContent = "";
+                
+                // Load profile data
+                document.getElementById("fullname").value = currentUser.fullname;
+                document.getElementById("email").value = currentUser.email;
+                
+                // Show profile section
+                loginSection.classList.remove("active");
+                profileSection.classList.add("active");
+            } else {
+                loginError.textContent = "Invalid username or password";
+            }
+        }
+
+        // Update profile function
+        function updateProfile() {
+            const newPassword = document.getElementById("new-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                profileMessage.textContent = "Passwords do not match";
+                profileMessage.style.color = "red";
+                return;
+            }
+            
+            // Update user data
+            currentUser.fullname = document.getElementById("fullname").value;
+            currentUser.email = document.getElementById("email").value;
+            
+            if (newPassword) {
+                currentUser.password = newPassword;
+            }
+            
+            profileMessage.textContent = "Profile updated successfully!";
+            profileMessage.style.color = "green";
+            
+            // Clear password fields
+            document.getElementById("new-password").value = "";
+            document.getElementById("confirm-password").value = "";
+        }
+
+        // Start exam function
+        function startExam() {
+            profileSection.classList.remove("active");
+            examSection.classList.add("active");
+            
+            // Reset exam data
+            userAnswers = Array(questions.length).fill(null);
+            currentQuestionIndex = 0;
+            timeLeft = 30 * 60;
+            
+            // Start timer
+            updateTimerDisplay();
+            examTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(examTimer);
+                    submitExam();
+                }
+            }, 1000);
+            
+            // Display first question
+            displayQuestion();
+        }
+
+        // Update timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        // Display current question
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            let optionsHtml = "";
+            question.options.forEach((option, index) => {
+                const isChecked = userAnswers[currentQuestionIndex] === index ? "checked" : "";
+                optionsHtml += `
+                    <div class="option">
+                        <input type="radio" id="option-${index}" name="answer" value="${index}" ${isChecked}
+                               onchange="saveAnswer(${index})">
+                        <label for="option-${index}">${option}</label>
+                    </div>
+                `;
+            });
+            
+            questionContainer.innerHTML = `
+                <div class="question">
+                    <h3>Question ${currentQuestionIndex + 1} of ${questions.length}</h3>
+                    <p>${question.question}</p>
+                    <div class="options">${optionsHtml}</div>
+                </div>
+            `;
+            
+            // Update nav buttons
+            document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
+            document.getElementById("next-btn").disabled = currentQuestionIndex === questions.length - 1;
+        }
+
+        // Save answer
+        function saveAnswer(answerIndex) {
+            userAnswers[currentQuestionIndex] = answerIndex;
+        }
+
+        // Navigate to previous question
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        // Navigate to next question
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        // Submit exam
+        function submitExam() {
+            clearInterval(examTimer);
+            
+            // Calculate score
+            let score = 0;
+            questions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                }
+            });
+            
+            // Display results
+            examSection.classList.remove("active");
+            resultSection.classList.add("active");
+            
+            document.getElementById("score-display").textContent = `Your Score: ${score}/${questions.length}`;
+            
+            let resultDetails = "<h3>Question Review:</h3>";
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.answer;
+                
+                resultDetails += `
+                    <div class="question-review" style="margin-bottom: 15px; padding: 10px; 
+                        background-color: ${isCorrect ? '#d4edda' : '#f8d7da'}; border-radius: 5px;">
+                        <p><strong>Question ${index + 1}:</strong> ${question.question}</p>
+                        <p>Your answer: ${userAnswer !== null ? question.options[userAnswer] : 'Not answered'}</p>
+                        <p>Correct answer: ${question.options[question.answer]}</p>
+                    </div>
+                `;
+            });
+            
+            document.getElementById("result-details").innerHTML = resultDetails;
+        }
+
+        // Logout function
+        function logout() {
+            currentUser = null;
+            clearInterval(examTimer);
+            
+            // Reset forms
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            document.getElementById("new-password").value = "";
+            document.getElementById("confirm-password").value = "";
+            profileMessage.textContent = "";
+            loginError.textContent = "";
+            
+            // Show login screen
+            profileSection.classList.remove("active");
+            examSection.classList.remove("active");
+            resultSection.classList.remove("active");
+            loginSection.classList.add("active");
+        }
+    </script>
+</body>
+</html>

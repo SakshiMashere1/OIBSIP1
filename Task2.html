@@ -1,130 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Number Guessing Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        pre {
-            background-color: #f4f4f4;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        .code-container {
-            margin: 20px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Guess the Number</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding-top: 50px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Number Guessing Game in Java</h1>
-    
-    <p>Here's a complete Java implementation of the Number Guessing Game:</p>
-    
-    <div class="code-container">
-        <pre><code>import java.util.Random;
-import java.util.Scanner;
 
-public class NumberGuessingGame {
-    private static final int MAX_ATTEMPTS = 10;
-    private static final int MAX_ROUNDS = 3;
-    private static final int POINTS_PER_ROUND = 100;
-    
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
-        
-        System.out.println("Welcome to the Number Guessing Game!");
-        System.out.println("You have " + MAX_ROUNDS + " rounds to play. Each round you'll have " + 
-                          MAX_ATTEMPTS + " attempts to guess the number (1-100).");
-        System.out.println("You'll earn more points for guessing correctly in fewer attempts!");
-        
-        int totalScore = 0;
-        
-        for (int round = 1; round <= MAX_ROUNDS; round++) {
-            int targetNumber = random.nextInt(100) + 1;
-            int attemptsLeft = MAX_ATTEMPTS;
-            boolean guessedCorrectly = false;
-            
-            System.out.println("\n--- Round " + round + " ---");
-            System.out.println("A number between 1 and 100 has been generated.");
-            
-            while (attemptsLeft > 0 && !guessedCorrectly) {
-                System.out.print("Attempts left: " + attemptsLeft + ". Enter your guess: ");
-                
-                try {
-                    int guess = scanner.nextInt();
-                    
-                    if (guess < 1 || guess > 100) {
-                        System.out.println("Please enter a number between 1 and 100.");
-                        continue;
-                    }
-                    
-                    if (guess == targetNumber) {
-                        guessedCorrectly = true;
-                        int roundScore = POINTS_PER_ROUND * attemptsLeft / MAX_ATTEMPTS;
-                        totalScore += roundScore;
-                        
-                        System.out.println("Congratulations! You guessed the number " + targetNumber + 
-                                          " correctly in " + (MAX_ATTEMPTS - attemptsLeft + 1) + 
-                                          " attempts!");
-                        System.out.println("You earned " + roundScore + " points this round.");
-                    } else if (guess < targetNumber) {
-                        System.out.println("Your guess is too low. Try again.");
-                        attemptsLeft--;
-                    } else {
-                        System.out.println("Your guess is too high. Try again.");
-                        attemptsLeft--;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.next(); // Clear the invalid input
-                }
-            }
-            
-            if (!guessedCorrectly) {
-                System.out.println("Sorry, you've run out of attempts. The number was " + targetNumber + ".");
-            }
-        }
-        
-        System.out.println("\nGame Over!");
-        System.out.println("Your total score is: " + totalScore + " out of " + 
-                          (POINTS_PER_ROUND * MAX_ROUNDS) + " possible points.");
-        
-        scanner.close();
+  <h1>🎯 Guess the Number (1 - 100)</h1>
+  <p>You have <span id="attemptsLeft">10</span> attempts left.</p>
+  <input type="number" id="userGuess" placeholder="Enter your guess" min="1" max="100">
+  <button onclick="checkGuess()">Guess</button>
+
+  <div class="message" id="message"></div>
+  <div class="message" id="scoreBoard"></div>
+  <button onclick="resetGame()">🔄 New Game</button>
+
+  <script>
+    let secretNumber = Math.floor(Math.random() * 100) + 1;
+    let attempts = 10;
+    let score = 0;
+
+    function checkGuess() {
+      const userGuess = Number(document.getElementById('userGuess').value);
+      const message = document.getElementById('message');
+
+      if (!userGuess || userGuess < 1 || userGuess > 100) {
+        message.textContent = '❌ Enter a valid number between 1 and 100.';
+        return;
+      }
+
+      attempts--;
+      document.getElementById('attemptsLeft').textContent = attempts;
+
+      if (userGuess === secretNumber) {
+        message.textContent = `🎉 Correct! The number was ${secretNumber}. You won!`;
+        score += attempts * 10;
+        document.getElementById('scoreBoard').textContent = `🏆 Score: ${score}`;
+        disableInput();
+      } else if (attempts === 0) {
+        message.textContent = `💀 Game Over! The number was ${secretNumber}.`;
+        disableInput();
+      } else {
+        message.textContent = userGuess > secretNumber
+          ? '📉 Too high! Try again.'
+          : '📈 Too low! Try again.';
+      }
     }
-}</code></pre>
-    </div>
-    
-    <h2>Game Features:</h2>
-    <ul>
-        <li>Computer generates a random number between 1 and 100</li>
-        <li>Player has 10 attempts per round to guess the number</li>
-        <li>Game consists of 3 rounds</li>
-        <li>Computer provides feedback (too high/too low) after each guess</li>
-        <li>Score is calculated based on remaining attempts</li>
-        <li>Input validation to ensure proper number entry</li>
-    </ul>
-    
-    <h2>How to Run:</h2>
-    <ol>
-        <li>Copy the code into a file named <code>NumberGuessingGame.java</code></li>
-        <li>Compile with <code>javac NumberGuessingGame.java</code></li>
-        <li>Run with <code>java NumberGuessingGame</code></li>
-    </ol>
-    
-    <h2>Customization Options:</h2>
-    <p>You can easily modify these constants at the top of the code:</p>
-    <ul>
-        <li><code>MAX_ATTEMPTS</code> - Change the number of guesses allowed per round</li>
-        <li><code>MAX_ROUNDS</code> - Change how many rounds to play</li>
-        <li><code>POINTS_PER_ROUND</code> - Adjust the scoring system</li>
-        <li>Change the range by modifying the <code>random.nextInt(100) + 1</code> line</li>
-    </ul>
+
+    function disableInput() {
+      document.getElementById('userGuess').disabled = true;
+    }
+
+    function resetGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 10;
+      document.getElementById('userGuess').disabled = false;
+      document.getElementById('userGuess').value = '';
+      document.getElementById('message').textContent = '';
+      document.getElementById('attemptsLeft').textContent = attempts;
+    }
+  </script>
+
 </body>
 </html>
